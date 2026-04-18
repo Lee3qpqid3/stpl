@@ -11,7 +11,7 @@ export default function SettingsForm() {
   const [message, setMessage] = useState('')
 
   useEffect(() => {
-    fetch('/api/auth/me')
+    fetch('/api/auth/me', { cache: 'no-store' })
       .then((res) => res.json())
       .then((data) => {
         if (!data.user) router.push('/login?next=/settings')
@@ -48,6 +48,12 @@ export default function SettingsForm() {
         <p className="eyebrow">SETTINGS</p>
         <h1>나의 계정 설정</h1>
         <p className="muted">로그인 계정: {me?.username || '확인 중'}</p>
+
+        <div className="row">
+          <a className="ghostButton" href="/chat">대화창으로 돌아가기</a>
+          <a className="ghostButton" href="/today">오늘 계획</a>
+          <a className="ghostButton" href="/week">주간 계획</a>
+        </div>
 
         <form className="form" onSubmit={changePassword}>
           <label>현재 비밀번호</label>
