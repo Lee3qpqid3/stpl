@@ -38,8 +38,9 @@ export default function WeekView() {
         </p>
 
         <div className="row">
+          <a className="ghostButton" href="/chat">대화창으로 돌아가기</a>
+          <a className="ghostButton" href="/today">오늘 계획</a>
           <button className="ghostButton" onClick={load}>새로고침</button>
-          <a className="primaryButton" href="/chat">AI와 주간 계획 만들기</a>
         </div>
 
         <h2>이번 주 활성 계획</h2>
@@ -56,7 +57,7 @@ export default function WeekView() {
 
           {plans.length === 0 && (
             <div className="listItem">
-              <b>이번 주 계획이 아직 화면에 없음</b>
+              <b>이번 주 계획 없음</b>
               <span>
                 대화창에서 “이번 주에 수학 미분 문제 40문제, 국어 문학 작품 3개, 영어 독해 6지문을 해야 한다.”라고 입력해라.
               </span>
