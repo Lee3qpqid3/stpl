@@ -24,13 +24,12 @@ function getKoreaNowParts(date = new Date()) {
 function getWeekRange(date = new Date()) {
   const { korea } = getKoreaNowParts(date)
   const day = korea.getDay()
-  const diffToMonday = day === 0 ? -6 : 1 - day
 
-  const monday = new Date(korea)
-  monday.setDate(korea.getDate() + diffToMonday)
+  const sunday = new Date(korea)
+  sunday.setDate(korea.getDate() - day)
 
-  const sunday = new Date(monday)
-  sunday.setDate(monday.getDate() + 6)
+  const saturday = new Date(sunday)
+  saturday.setDate(sunday.getDate() + 6)
 
   const fmt = (d) => {
     const y = d.getFullYear()
@@ -40,8 +39,8 @@ function getWeekRange(date = new Date()) {
   }
 
   return {
-    weekStart: fmt(monday),
-    weekEnd: fmt(sunday),
+    weekStart: fmt(sunday),
+    weekEnd: fmt(saturday),
   }
 }
 
