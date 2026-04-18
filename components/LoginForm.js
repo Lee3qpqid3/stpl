@@ -10,6 +10,7 @@ export default function LoginForm() {
 
   const [username, setUsername] = useState('user')
   const [password, setPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(true)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -22,15 +23,10 @@ export default function LoginForm() {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password, rememberMe }),
       })
 
-      let data = {}
-      try {
-        data = await res.json()
-      } catch {
-        data = { error: '서버가 JSON 응답을 반환하지 않았다. Vercel Function Logs를 확인해야 한다.' }
-      }
+      const data = await res.json()
 
       if (!res.ok) {
         setError(data.error || `로그인 실패: ${res.status}`)
@@ -38,8 +34,8 @@ export default function LoginForm() {
       }
 
       router.push(next)
-    } catch (err) {
-      setError('로그인 요청 자체가 실패했다. DATABASE_URL 또는 AUTH_SECRET 환경변수를 확인해라.')
+    } catch {
+      setError('로그인 요청이 실패했다.')
     } finally {
       setLoading(false)
     }
@@ -65,6 +61,15 @@ export default function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+
+          <label className="checkboxRow">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+            />
+            <span>자동 로그인 유지</span>
+          </label>
 
           {error && <p className="errorText">{error}</p>}
 
