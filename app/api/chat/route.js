@@ -3,22 +3,43 @@ import { getSql } from '../../../lib/db'
 import { requireUser } from '../../../lib/auth'
 import { analyzeLearningMessage } from '../../../lib/learning-ai'
 
+function getKoreaNowParts(date = new Date()) {
+  const korea = new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }))
+
+  const y = korea.getFullYear()
+  const m = String(korea.getMonth() + 1).padStart(2, '0')
+  const d = String(korea.getDate()).padStart(2, '0')
+  const hh = String(korea.getHours()).padStart(2, '0')
+  const mm = String(korea.getMinutes()).padStart(2, '0')
+
+  return {
+    korea,
+    koreaDate: `${y}-${m}-${d}`,
+    koreaNowText: `${y}년 ${Number(m)}월 ${Number(d)}일 ${hh}:${mm}`,
+  }
+}
+
 function getWeekRange(date = new Date()) {
-  const d = new Date(date)
-  const day = d.getDay()
+  const { korea } = getKoreaNowParts(date)
+  const day = korea.getDay()
   const diffToMonday = day === 0 ? -6 : 1 - day
 
-  const monday = new Date(d)
-  monday.setDate(d.getDate() + diffToMonday)
-  monday.setHours(0, 0, 0, 0)
+  const monday = new Date(korea)
+  monday.setDate(korea.getDate() + diffToMonday)
 
   const sunday = new Date(monday)
   sunday.setDate(monday.getDate() + 6)
-  sunday.setHours(23, 59, 59, 999)
+
+  const fmt = (d) => {
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${y}-${m}-${day}`
+  }
 
   return {
-    weekStart: monday.toISOString().slice(0, 10),
-    weekEnd: sunday.toISOString().slice(0, 10),
+    weekStart: fmt(monday),
+    weekEnd: fmt(sunday),
   }
 }
 
@@ -207,14 +228,19 @@ export async function POST(req) {
       LIMIT 20
     `
 
-    const context = {
-      serverNow: new Date().toISOString(),
-      user: { id: user.id, username: user.username },
-      activeSession: activeSessions[0] || null,
-      weeklyPlans,
-      todaySessions,
-      recentMessages: recentMessages.reverse(),
-    }
+    const koreaTime = getKoreaNowParts()
+
+const context = {
+  serverNow: new Date().toISOString(),
+  koreaNow: koreaTime.koreaNowText,
+  koreaDate: koreaTime.koreaDate,
+  timezone: 'Asia/Seoul',
+  user: { id: user.id, username: user.username },
+  activeSession: activeSessions[0] || null,
+  weeklyPlans,
+  todaySessions,
+  recentMessages: recentMessages.reverse(),
+}
 
     const analysis = await analyzeLearningMessage({ message, context })
 
