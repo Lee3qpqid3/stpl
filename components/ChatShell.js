@@ -3,6 +3,41 @@
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
+function buildStarterMessage({ weekData, todayData }) {
+  const plans = weekData?.weeklyPlans || []
+  const activeSession = todayData?.activeSession || null
+  const todayMinutes = todayData?.todayMinutes || 0
+
+  if (plans.length > 0) {
+    const planLines = plans
+      .slice(0, 5)
+      .map((p) => {
+        const quantityText = p.target_quantity ? ` ${p.target_quantity}` : ''
+        return `- ${p.subject}: ${p.target_description || '목표 미상'}${quantityText}`
+      })
+      .join('\n')
+
+    const firstPlan = plans[0]
+
+    return (
+      `현재 저장된 이번 주 계획을 확인했다.\n\n` +
+      `이번 주 범위: ${weekData.weekStart} ~ ${weekData.weekEnd}\n` +
+      `오늘 누적 학습 시간: ${todayMinutes}분\n` +
+      `현재 진행 중인 세션: ${activeSession ? `${activeSession.subject} 진행 중` : '없음'}\n\n` +
+      `이번 주 주요 계획:\n${planLines}\n\n` +
+      `오늘은 우선 ${firstPlan.subject}부터 시작하는 것이 좋다. ` +
+      `지금 바로 시작하려면 “${firstPlan.subject} 시작”이라고 입력해라. ` +
+      `이미 다른 과목을 먼저 하고 싶다면 그렇게 말해도 된다. 단, 주간 목표 기준으로 편중 여부는 내가 바로 지적하겠다.`
+    )
+  }
+
+  return (
+    '학습 비서 대화창이다. 아직 저장된 주간 계획이 없다. ' +
+    '“이번 주에 수학 미분 문제 40문제, 국어 문학 작품 3개, 영어 독해 6지문을 해야 한다.”처럼 말하면 ' +
+    '그 내용을 주간 계획으로 저장하고, 이후 오늘 계획에 반영하겠다.'
+  )
+}
+
 export default function ChatShell() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -35,15 +70,24 @@ export default function ChatShell() {
             content: m.content,
           }))
         )
-      } else {
-        setMessages([
-          {
-            role: 'assistant',
-            content:
-              '학습 비서 대화창이다. “수학 시작”, “끝. 12문제 풀었고 어려웠음”, “이번 주 물리 회로 40문제 추가”처럼 자유롭게 입력해라. 기본 데이터가 부족하면 짧게 질문하겠다.',
-          },
-        ])
+        setLoaded(true)
+        return
       }
+
+      const [weekRes, todayRes] = await Promise.all([
+        fetch('/api/summary?scope=week', { cache: 'no-store' }),
+        fetch('/api/summary?scope=today', { cache: 'no-store' }),
+      ])
+
+      const weekData = weekRes.ok ? await weekRes.json() : null
+      const todayData = todayRes.ok ? await todayRes.json() : null
+
+      setMessages([
+        {
+          role: 'assistant',
+          content: buildStarterMessage({ weekData, todayData }),
+        },
+      ])
 
       setLoaded(true)
     }
@@ -140,19 +184,21 @@ export default function ChatShell() {
               <p>{m.content}</p>
             </div>
           ))}
+
           {loading && (
             <div className="bubble assistant">
               <span>AI</span>
               <p>분석 중...</p>
             </div>
           )}
+
           <div ref={bottomRef} />
         </div>
 
         <form className="composer" onSubmit={handleSubmit}>
           <textarea
             rows={3}
-            placeholder="예: 수학 시작 / 끝. 12문제 풀었고 어려웠음 / 오늘 마감 / 이번 주 물리 회로 40문제 추가"
+            placeholder="예: 수학 시작 / 끝. 12문제 풀었고 어려웠음 / 오늘 마감 / 이번 주 물리 회로 문제 40개 추가"
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />
