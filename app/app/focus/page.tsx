@@ -27,7 +27,7 @@ export default function FocusPage() {
   const s = String(seconds % 60).padStart(2, "0");
 
   return (
-    <main className="min-h-screen md:flex">
+    <main className="flex min-h-screen">
       <AppNav />
       <section className="flex-1 p-6">
         <div className="rounded-3xl bg-white p-6 shadow">
