@@ -40,7 +40,7 @@ export default function AppNav() {
             className="absolute inset-0 bg-black/45"
           />
 
-          <aside className="absolute left-0 top-0 h-full w-72 bg-white p-4 shadow-2xl">
+          <aside className="absolute left-0 top-0 h-full w-72 max-w-[85vw] bg-white p-4 shadow-2xl">
             <div className="flex items-center justify-between border-b pb-4">
               <div>
                 <div className="text-lg font-bold">STPL</div>
