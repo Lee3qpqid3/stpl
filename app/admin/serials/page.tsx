@@ -149,7 +149,8 @@ export default function AdminSerialsPage() {
     <div className="w-full max-w-full overflow-hidden rounded-3xl bg-white p-4 shadow sm:p-6">
       <h1 className="text-2xl font-bold">시리얼키 관리</h1>
       <p className="mt-2 text-sm text-slate-500">
-        시리얼키 문자는 항상 서버에서 랜덤으로 생성됩니다. 관리자는 기간과 생성 개수만 설정합니다.
+        시리얼키 문자는 항상 서버에서 랜덤으로 생성됩니다. 관리자는 기간과
+        생성 개수만 설정합니다.
       </p>
 
       <div className="mt-6 rounded-2xl border p-4">
@@ -159,7 +160,8 @@ export default function AdminSerialsPage() {
           <div>
             <label className="text-sm font-medium">기간</label>
             <p className="mt-1 text-xs text-slate-500">
-              이 시리얼키를 등록한 사용자에게 추가할 Pro 이용 기간입니다. 단위는 일입니다.
+              이 시리얼키를 등록한 사용자에게 추가할 Pro 이용 기간입니다. 단위는
+              일입니다.
             </p>
             <input
               className="mt-2 w-full rounded-xl border p-3"
@@ -243,11 +245,11 @@ export default function AdminSerialsPage() {
       )}
 
       <div className="mt-6 rounded-2xl border p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <h2 className="font-semibold">시리얼키 목록</h2>
           <button
             onClick={loadSerials}
-            className="rounded-xl border px-3 py-2 text-sm hover:bg-slate-50"
+            className="shrink-0 rounded-xl border px-3 py-2 text-sm hover:bg-slate-50"
           >
             새로고침
           </button>
@@ -289,7 +291,9 @@ export default function AdminSerialsPage() {
                   </td>
                   <td className="p-3">
                     {serial.activationStartAt
-                      ? new Date(serial.activationStartAt).toLocaleString("ko-KR")
+                      ? new Date(serial.activationStartAt).toLocaleString(
+                          "ko-KR"
+                        )
                       : "-"}
                   </td>
                   <td className="p-3">
@@ -302,7 +306,9 @@ export default function AdminSerialsPage() {
                     <div className="flex gap-2">
                       {serial.status !== "disabled" && (
                         <button
-                          onClick={() => disableSerial(serial.id, serial.status)}
+                          onClick={() =>
+                            disableSerial(serial.id, serial.status)
+                          }
                           className="rounded-lg border border-red-200 px-3 py-1 text-xs text-red-600 hover:bg-red-50"
                         >
                           비활성화
