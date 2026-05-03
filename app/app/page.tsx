@@ -11,7 +11,7 @@ export default async function AppHomePage() {
   }
 
   return (
-    <main className="min-h-screen md:flex">
+    <main className="flex min-h-screen">
       <AppNav />
 
       <section className="flex-1 p-6">
