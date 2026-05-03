@@ -26,3 +26,8 @@ select,
 textarea {
   font: inherit;
 }
+
+.writing-mode-vertical {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
