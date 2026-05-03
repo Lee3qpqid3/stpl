@@ -16,8 +16,7 @@ export default function AdminNav() {
 
   return (
     <>
-      {/* 좁은 화면: 항상 보이는 축소 사이드 탭 */}
-      <aside className="sticky top-0 z-40 flex h-dvh w-16 shrink-0 flex-col items-center border-r bg-slate-950 p-2 text-white md:flex lg:hidden">
+      <aside className="sticky top-0 z-40 flex h-dvh w-16 shrink-0 flex-col items-center border-r bg-slate-950 p-2 text-white">
         <button
           onClick={() => setOpen(true)}
           className="mt-2 flex h-11 w-11 items-center justify-center rounded-xl border border-slate-700 text-xl font-bold hover:bg-slate-800"
@@ -31,9 +30,8 @@ export default function AdminNav() {
         </div>
       </aside>
 
-      {/* 좁은 화면: 메뉴 열렸을 때 오버레이 */}
       {open && (
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <div className="fixed inset-0 z-50">
           <button
             aria-label="메뉴 닫기"
             onClick={() => setOpen(false)}
@@ -84,36 +82,6 @@ export default function AdminNav() {
           </aside>
         </div>
       )}
-
-      {/* 넓은 화면: 기존처럼 펼쳐진 사이드바 */}
-      <aside className="hidden h-dvh w-60 shrink-0 border-r bg-slate-950 p-3 text-white lg:sticky lg:top-0 lg:block">
-        <nav className="flex h-full flex-col gap-2">
-          <div className="mb-3 px-3 py-2 text-lg font-bold">STPL Admin</div>
-
-          {adminLinks.map((link) => (
-            <Link
-              key={link.href}
-              className="whitespace-nowrap rounded-xl px-3 py-2 text-sm hover:bg-slate-800"
-              href={link.href}
-            >
-              {link.label}
-            </Link>
-          ))}
-
-          <div className="my-1 border-t border-slate-700" />
-
-          <Link
-            className="whitespace-nowrap rounded-xl px-3 py-2 text-sm hover:bg-slate-800"
-            href="/app"
-          >
-            사용자 앱으로 이동
-          </Link>
-
-          <div className="mt-auto">
-            <LogoutButton />
-          </div>
-        </nav>
-      </aside>
     </>
   );
 }
