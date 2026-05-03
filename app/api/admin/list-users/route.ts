@@ -34,7 +34,7 @@ export async function GET() {
     authData.users.map((user) => [user.id, user.email ?? ""])
   );
 
-  const users = profileData.map((profile) => {
+  const users = (profileData ?? []).map((profile) => {
     const proExpiresAt = profile.pro_expires_at
       ? new Date(profile.pro_expires_at)
       : null;
@@ -51,9 +51,13 @@ export async function GET() {
       proExpiresAt: profile.pro_expires_at,
       isPro,
       createdAt: profile.created_at,
-      memo: profile.memo
+      memo: profile.memo,
+      isCurrentUser: profile.id === session.user.id
     };
   });
 
-  return NextResponse.json({ users });
+  return NextResponse.json({
+    currentUserId: session.user.id,
+    users
+  });
 }
