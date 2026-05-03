@@ -14,7 +14,7 @@ export default async function AppHomePage() {
     <main className="flex min-h-screen">
       <AppNav />
 
-      <section className="flex-1 p-6">
+      <section className="min-w-0 flex-1 overflow-x-hidden p-4 sm:p-6">
         <div className="rounded-3xl bg-white p-6 shadow">
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div>
