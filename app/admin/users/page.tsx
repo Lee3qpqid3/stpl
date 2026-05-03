@@ -22,7 +22,9 @@ export default function AdminUsersPage() {
   const [message, setMessage] = useState("");
 
   async function loadUsers() {
-    const response = await fetch("/api/admin/list-users");
+    const response = await fetch("/api/admin/list-users", {
+      cache: "no-store"
+    });
     const result = await response.json();
 
     if (!response.ok) {
@@ -30,7 +32,7 @@ export default function AdminUsersPage() {
       return;
     }
 
-    setUsers(result.users);
+    setUsers(result.users ?? []);
   }
 
   useEffect(() => {
@@ -180,7 +182,7 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="rounded-3xl bg-white p-6 shadow">
+    <div className="w-full max-w-full overflow-hidden rounded-3xl bg-white p-4 shadow sm:p-6">
       <h1 className="text-2xl font-bold">사용자 관리</h1>
       <p className="mt-2 text-sm text-slate-500">
         비밀번호는 보안상 조회할 수 없으며, 관리자도 재설정만 할 수 있습니다.
@@ -228,18 +230,18 @@ export default function AdminUsersPage() {
       {message && <p className="mt-4 text-sm text-slate-600">{message}</p>}
 
       <div className="mt-6 rounded-2xl border p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <h2 className="font-semibold">사용자 목록</h2>
           <button
             onClick={loadUsers}
-            className="rounded-xl border px-3 py-2 text-sm hover:bg-slate-50"
+            className="shrink-0 rounded-xl border px-3 py-2 text-sm hover:bg-slate-50"
           >
             새로고침
           </button>
         </div>
 
-        <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[1100px] border-collapse text-sm">
+        <div className="mt-4 w-full max-w-full overflow-x-auto rounded-xl">
+          <table className="min-w-[1100px] border-collapse text-sm">
             <thead>
               <tr className="border-b bg-slate-50 text-left">
                 <th className="p-3">이름</th>
