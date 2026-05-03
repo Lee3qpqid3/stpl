@@ -27,6 +27,7 @@ export async function POST(request: Request) {
     .from("serial_keys")
     .select("*")
     .eq("key_raw", keyRaw)
+    .is("deleted_at", null)
     .single();
 
   if (serialError || !serial) {
@@ -46,19 +47,19 @@ export async function POST(request: Request) {
     ? new Date(session.profile.pro_expires_at)
     : null;
 
-  const baseDate =
+  const activationStart =
     currentExpiresAt && currentExpiresAt.getTime() > now.getTime()
       ? currentExpiresAt
       : now;
 
-  const newExpiresAt = new Date(
-    baseDate.getTime() + serial.duration_days * 24 * 60 * 60 * 1000
+  const activationEnd = new Date(
+    activationStart.getTime() + serial.duration_days * 24 * 60 * 60 * 1000
   );
 
   const { error: profileError } = await supabaseAdmin
     .from("user_profiles")
     .update({
-      pro_expires_at: newExpiresAt.toISOString(),
+      pro_expires_at: activationEnd.toISOString(),
       updated_at: now.toISOString()
     })
     .eq("id", session.user.id);
@@ -72,7 +73,9 @@ export async function POST(request: Request) {
     .update({
       status: "used",
       used_at: now.toISOString(),
-      used_by_user_id: session.user.id
+      used_by_user_id: session.user.id,
+      activation_start_at: activationStart.toISOString(),
+      activation_end_at: activationEnd.toISOString()
     })
     .eq("id", serial.id);
 
@@ -83,6 +86,6 @@ export async function POST(request: Request) {
   return NextResponse.json({
     ok: true,
     durationDays: serial.duration_days,
-    proExpiresAt: newExpiresAt.toISOString()
+    proExpiresAt: activationEnd.toISOString()
   });
 }
