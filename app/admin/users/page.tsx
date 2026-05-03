@@ -117,11 +117,73 @@ export default function AdminUsersPage() {
     await loadUsers();
   }
 
+  async function editUserName(user: AdminUser) {
+    const nextName = window.prompt("새 사용자 이름을 입력하세요.", user.name);
+
+    if (!nextName) return;
+
+    const response = await fetch("/api/admin/update-user", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        userId: user.id,
+        name: nextName
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      setMessage(result.error ?? "이름 수정 실패");
+      return;
+    }
+
+    setMessage("사용자 이름을 수정했습니다.");
+    await loadUsers();
+  }
+
+  async function resetUserPassword(user: AdminUser) {
+    const newPassword = window.prompt(
+      `${user.name} 계정의 새 비밀번호를 입력하세요. 기존 비밀번호는 조회할 수 없습니다.`
+    );
+
+    if (!newPassword) return;
+
+    const confirmPassword = window.prompt("새 비밀번호를 한 번 더 입력하세요.");
+
+    if (newPassword !== confirmPassword) {
+      setMessage("새 비밀번호와 확인 비밀번호가 일치하지 않습니다.");
+      return;
+    }
+
+    const response = await fetch("/api/admin/update-user", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        userId: user.id,
+        newPassword
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      setMessage(result.error ?? "비밀번호 재설정 실패");
+      return;
+    }
+
+    setMessage("비밀번호를 재설정했습니다.");
+  }
+
   return (
     <div className="rounded-3xl bg-white p-6 shadow">
       <h1 className="text-2xl font-bold">사용자 관리</h1>
       <p className="mt-2 text-sm text-slate-500">
-        웹에서는 회원가입을 제공하지 않으며, 관리자가 이 화면에서 계정을 생성하고 관리합니다.
+        비밀번호는 보안상 조회할 수 없으며, 관리자도 재설정만 할 수 있습니다.
       </p>
 
       <div className="mt-6 rounded-2xl border p-4">
@@ -177,7 +239,7 @@ export default function AdminUsersPage() {
         </div>
 
         <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[950px] border-collapse text-sm">
+          <table className="w-full min-w-[1100px] border-collapse text-sm">
             <thead>
               <tr className="border-b bg-slate-50 text-left">
                 <th className="p-3">이름</th>
@@ -210,36 +272,56 @@ export default function AdminUsersPage() {
                       : "-"}
                   </td>
                   <td className="p-3">
-                    {user.isCurrentUser ? (
-                      <span className="text-xs text-slate-400">
-                        자기 계정은 비활성화/삭제 불가
-                      </span>
-                    ) : (
-                      <div className="flex gap-2">
-                        {user.accountStatus === "active" ? (
-                          <button
-                            onClick={() => updateUserStatus(user.id, "disabled")}
-                            className="rounded-lg border px-3 py-1 text-xs hover:bg-slate-50"
-                          >
-                            비활성화
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => updateUserStatus(user.id, "active")}
-                            className="rounded-lg border px-3 py-1 text-xs hover:bg-slate-50"
-                          >
-                            재활성화
-                          </button>
-                        )}
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => editUserName(user)}
+                        className="rounded-lg border px-3 py-1 text-xs hover:bg-slate-50"
+                      >
+                        이름 수정
+                      </button>
 
-                        <button
-                          onClick={() => deleteUser(user.id)}
-                          className="rounded-lg border border-red-200 px-3 py-1 text-xs text-red-600 hover:bg-red-50"
-                        >
-                          삭제
-                        </button>
-                      </div>
-                    )}
+                      <button
+                        onClick={() => resetUserPassword(user)}
+                        className="rounded-lg border px-3 py-1 text-xs hover:bg-slate-50"
+                      >
+                        비밀번호 재설정
+                      </button>
+
+                      {user.isCurrentUser ? (
+                        <span className="text-xs text-slate-400">
+                          자기 계정 비활성화/삭제 불가
+                        </span>
+                      ) : (
+                        <>
+                          {user.accountStatus === "active" ? (
+                            <button
+                              onClick={() =>
+                                updateUserStatus(user.id, "disabled")
+                              }
+                              className="rounded-lg border px-3 py-1 text-xs hover:bg-slate-50"
+                            >
+                              비활성화
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() =>
+                                updateUserStatus(user.id, "active")
+                              }
+                              className="rounded-lg border px-3 py-1 text-xs hover:bg-slate-50"
+                            >
+                              재활성화
+                            </button>
+                          )}
+
+                          <button
+                            onClick={() => deleteUser(user.id)}
+                            className="rounded-lg border border-red-200 px-3 py-1 text-xs text-red-600 hover:bg-red-50"
+                          >
+                            삭제
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
