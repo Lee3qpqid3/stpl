@@ -146,7 +146,7 @@ export default function AdminSerialsPage() {
   }
 
   return (
-    <div className="rounded-3xl bg-white p-6 shadow">
+    <div className="w-full max-w-full overflow-hidden rounded-3xl bg-white p-4 shadow sm:p-6">
       <h1 className="text-2xl font-bold">시리얼키 관리</h1>
       <p className="mt-2 text-sm text-slate-500">
         시리얼키 문자는 항상 서버에서 랜덤으로 생성됩니다. 관리자는 기간과 생성 개수만 설정합니다.
