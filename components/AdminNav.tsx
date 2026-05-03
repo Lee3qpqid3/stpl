@@ -16,9 +16,13 @@ export default function AdminNav() {
       <Link className="rounded-xl px-3 py-2 hover:bg-slate-800" href="/admin/backups">
         백업 관리
       </Link>
+
+      <div className="my-1 hidden border-t border-slate-700 md:block" />
+
       <Link className="rounded-xl px-3 py-2 hover:bg-slate-800" href="/app">
-        사용자 앱
+        사용자 앱으로 이동
       </Link>
+
       <div className="md:mt-auto">
         <LogoutButton />
       </div>
