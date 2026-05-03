@@ -38,7 +38,7 @@ export default function AdminNav() {
             className="absolute inset-0 bg-black/55"
           />
 
-          <aside className="absolute left-0 top-0 h-full w-72 bg-slate-950 p-4 text-white shadow-2xl">
+          <aside className="absolute left-0 top-0 h-full w-72 max-w-[85vw] bg-slate-950 p-4 text-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-700 pb-4">
               <div>
                 <div className="text-lg font-bold">STPL Admin</div>
