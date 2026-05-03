@@ -14,8 +14,9 @@ export async function GET() {
   const { data: serials, error: serialError } = await supabaseAdmin
     .from("serial_keys")
     .select(
-      "id, key_display, duration_days, status, created_at, used_at, used_by_user_id, memo"
+      "id, key_display, duration_days, status, created_at, used_at, used_by_user_id, memo, activation_start_at, activation_end_at, disabled_at"
     )
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
   if (serialError) {
@@ -54,7 +55,10 @@ export async function GET() {
     usedByUserName: serial.used_by_user_id
       ? userNameMap.get(serial.used_by_user_id) ?? "이름 없음"
       : "-",
-    memo: serial.memo
+    memo: serial.memo,
+    activationStartAt: serial.activation_start_at,
+    activationEndAt: serial.activation_end_at,
+    disabledAt: serial.disabled_at
   }));
 
   return NextResponse.json({
