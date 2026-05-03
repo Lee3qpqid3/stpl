@@ -18,9 +18,11 @@ export default async function AdminLayout({
   }
 
   return (
-    <main className="min-h-screen md:flex">
+    <main className="flex min-h-screen w-full max-w-full overflow-x-hidden">
       <AdminNav />
-      <section className="flex-1 p-6">{children}</section>
+      <section className="min-w-0 flex-1 overflow-x-hidden p-4 sm:p-6">
+        {children}
+      </section>
     </main>
   );
 }
