@@ -22,6 +22,10 @@ export async function getCurrentUserProfile() {
     return null;
   }
 
+  if (profile.account_status !== "active") {
+    return null;
+  }
+
   const now = new Date();
   const proExpiresAt = profile.pro_expires_at
     ? new Date(profile.pro_expires_at)
