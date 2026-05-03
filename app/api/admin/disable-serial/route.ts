@@ -28,9 +28,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "시리얼키를 찾을 수 없습니다." }, { status: 404 });
   }
 
-  if (serial.status === "used") {
+  if (serial.status === "disabled") {
     return NextResponse.json(
-      { error: "이미 사용된 시리얼키는 비활성화할 수 없습니다." },
+      { error: "이미 비활성화된 시리얼키입니다." },
       { status: 400 }
     );
   }
@@ -46,5 +46,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({
+    ok: true,
+    previousStatus: serial.status
+  });
 }
