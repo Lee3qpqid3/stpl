@@ -23,7 +23,12 @@ export default function AdminSerialsPage() {
   const [message, setMessage] = useState("");
 
   async function loadSerials() {
-    const response = await fetch("/api/admin/list-serials");
+    setMessage("시리얼키 목록을 불러오는 중...");
+
+    const response = await fetch("/api/admin/list-serials", {
+      cache: "no-store"
+    });
+
     const result = await response.json();
 
     if (!response.ok) {
@@ -31,7 +36,8 @@ export default function AdminSerialsPage() {
       return;
     }
 
-    setSerials(result.serials);
+    setSerials(result.serials ?? []);
+    setMessage(`시리얼키 ${result.count ?? 0}개를 불러왔습니다.`);
   }
 
   useEffect(() => {
@@ -76,8 +82,12 @@ export default function AdminSerialsPage() {
     setMessage("생성된 시리얼키 전체를 복사했습니다.");
   }
 
-  async function disableSerial(serialId: string) {
-    const ok = window.confirm("이 시리얼키를 비활성화할까요?");
+  async function disableSerial(serialId: string, currentStatus: string) {
+    const ok = window.confirm(
+      currentStatus === "used"
+        ? "이미 사용된 시리얼키입니다. 비활성화해도 이미 추가된 Pro 기간은 자동으로 회수되지 않습니다. 그래도 비활성화할까요?"
+        : "이 시리얼키를 비활성화할까요?"
+    );
 
     if (!ok) return;
 
@@ -211,7 +221,7 @@ export default function AdminSerialsPage() {
         </div>
 
         <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[1000px] border-collapse text-sm">
+          <table className="w-full min-w-[1050px] border-collapse text-sm">
             <thead>
               <tr className="border-b bg-slate-50 text-left">
                 <th className="p-3">시리얼키</th>
@@ -236,7 +246,19 @@ export default function AdminSerialsPage() {
                     </button>
                   </td>
                   <td className="p-3">{serial.durationDays}일</td>
-                  <td className="p-3">{serial.status}</td>
+                  <td className="p-3">
+                    <span
+                      className={
+                        serial.status === "used"
+                          ? "rounded-full bg-blue-50 px-2 py-1 text-xs text-blue-700"
+                          : serial.status === "disabled"
+                            ? "rounded-full bg-red-50 px-2 py-1 text-xs text-red-700"
+                            : "rounded-full bg-green-50 px-2 py-1 text-xs text-green-700"
+                      }
+                    >
+                      {serial.status}
+                    </span>
+                  </td>
                   <td className="p-3">{serial.usedByUserName}</td>
                   <td className="p-3">
                     {new Date(serial.createdAt).toLocaleString("ko-KR")}
@@ -248,15 +270,15 @@ export default function AdminSerialsPage() {
                   </td>
                   <td className="p-3">{serial.memo ?? "-"}</td>
                   <td className="p-3">
-                    {serial.status === "unused" ? (
+                    {serial.status !== "disabled" ? (
                       <button
-                        onClick={() => disableSerial(serial.id)}
+                        onClick={() => disableSerial(serial.id, serial.status)}
                         className="rounded-lg border border-red-200 px-3 py-1 text-xs text-red-600 hover:bg-red-50"
                       >
                         비활성화
                       </button>
                     ) : (
-                      <span className="text-xs text-slate-400">-</span>
+                      <span className="text-xs text-slate-400">비활성화됨</span>
                     )}
                   </td>
                 </tr>
@@ -265,7 +287,7 @@ export default function AdminSerialsPage() {
               {serials.length === 0 && (
                 <tr>
                   <td className="p-3 text-slate-500" colSpan={8}>
-                    시리얼키 목록이 없습니다.
+                    시리얼키 목록이 없습니다. 새로고침을 눌렀을 때 오류 메시지가 뜨는지도 확인하세요.
                   </td>
                 </tr>
               )}
