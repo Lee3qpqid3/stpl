@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function AdminHomePage() {
   return (
-    <div className="rounded-3xl bg-white p-6 shadow">
+    <div className="w-full max-w-full overflow-hidden rounded-3xl bg-white p-4 shadow sm:p-6">
       <h1 className="text-2xl font-bold">관리자 홈</h1>
       <p className="mt-2 text-slate-600">
         사용자 계정, 시리얼키, 백업을 관리합니다.
