@@ -14,6 +14,7 @@ type Subject = {
   name: string;
   category_id: string;
   categories?: {
+    id: string;
     name: string;
     color: string;
   };
@@ -30,15 +31,6 @@ type WorkTask = {
   total_duration_seconds: number;
   progress_formula: string | null;
   deadline: string | null;
-  subjects?: {
-    id: string;
-    name: string;
-    categories?: {
-      id: string;
-      name: string;
-      color: string;
-    };
-  };
 };
 
 const pastelColors = [
@@ -69,6 +61,7 @@ export default function WeeklyPage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [workTasks, setWorkTasks] = useState<WorkTask[]>([]);
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const [categoryName, setCategoryName] = useState("");
   const [categoryColor, setCategoryColor] = useState("#A7C7E7");
@@ -88,35 +81,64 @@ export default function WeeklyPage() {
   const [deadline, setDeadline] = useState("");
 
   async function loadAll() {
-    const [categoriesResponse, subjectsResponse, workTasksResponse] =
-      await Promise.all([
-        fetch("/api/categories", { cache: "no-store" }),
-        fetch("/api/subjects", { cache: "no-store" }),
-        fetch("/api/work-tasks", { cache: "no-store" })
-      ]);
+    setLoading(true);
 
-    const categoriesResult = await categoriesResponse.json();
-    const subjectsResult = await subjectsResponse.json();
-    const workTasksResult = await workTasksResponse.json();
+    try {
+      const [categoriesResponse, subjectsResponse, workTasksResponse] =
+        await Promise.all([
+          fetch("/api/categories", { cache: "no-store" }),
+          fetch("/api/subjects", { cache: "no-store" }),
+          fetch("/api/work-tasks", { cache: "no-store" })
+        ]);
 
-    if (!categoriesResponse.ok) {
-      setMessage(categoriesResult.error ?? "카테고리 불러오기 실패");
-      return;
+      const categoriesResult = await categoriesResponse.json();
+      const subjectsResult = await subjectsResponse.json();
+      const workTasksResult = await workTasksResponse.json();
+
+      if (!categoriesResponse.ok) {
+        setMessage(categoriesResult.error ?? "카테고리 불러오기 실패");
+        return;
+      }
+
+      if (!subjectsResponse.ok) {
+        setMessage(subjectsResult.error ?? "서브젝트 불러오기 실패");
+        return;
+      }
+
+      if (!workTasksResponse.ok) {
+        setMessage(workTasksResult.error ?? "워크/테스크 불러오기 실패");
+        return;
+      }
+
+      const nextCategories = categoriesResult.categories ?? [];
+      const nextSubjects = subjectsResult.subjects ?? [];
+
+      setCategories(nextCategories);
+      setSubjects(nextSubjects);
+      setWorkTasks(workTasksResult.workTasks ?? []);
+
+      if (
+        subjectCategoryId &&
+        !nextCategories.some((category: Category) => category.id === subjectCategoryId)
+      ) {
+        setSubjectCategoryId("");
+      }
+
+      if (
+        workTaskSubjectId &&
+        !nextSubjects.some((subject: Subject) => subject.id === workTaskSubjectId)
+      ) {
+        setWorkTaskSubjectId("");
+      }
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "데이터를 불러오는 중 오류가 발생했습니다."
+      );
+    } finally {
+      setLoading(false);
     }
-
-    if (!subjectsResponse.ok) {
-      setMessage(subjectsResult.error ?? "서브젝트 불러오기 실패");
-      return;
-    }
-
-    if (!workTasksResponse.ok) {
-      setMessage(workTasksResult.error ?? "워크/테스크 불러오기 실패");
-      return;
-    }
-
-    setCategories(categoriesResult.categories ?? []);
-    setSubjects(subjectsResult.subjects ?? []);
-    setWorkTasks(workTasksResult.workTasks ?? []);
   }
 
   useEffect(() => {
@@ -148,6 +170,10 @@ export default function WeeklyPage() {
     setCategoryColor("#A7C7E7");
     setMessage("카테고리를 생성했습니다.");
     await loadAll();
+
+    if (result.category?.id) {
+      setSubjectCategoryId(result.category.id);
+    }
   }
 
   async function createSubject() {
@@ -175,6 +201,10 @@ export default function WeeklyPage() {
     setSubjectCategoryId("");
     setMessage("서브젝트를 생성했습니다.");
     await loadAll();
+
+    if (result.subject?.id) {
+      setWorkTaskSubjectId(result.subject.id);
+    }
   }
 
   async function createWorkTask() {
@@ -233,11 +263,11 @@ export default function WeeklyPage() {
   }, [categories, subjects]);
 
   return (
-    <main className="flex min-h-screen">
+    <main className="flex min-h-screen w-full max-w-full overflow-x-hidden">
       <AppNav />
 
       <section className="min-w-0 flex-1 overflow-x-hidden p-4 sm:p-6">
-        <div className="rounded-3xl bg-white p-6 shadow">
+        <div className="w-full max-w-full overflow-hidden rounded-3xl bg-white p-4 shadow sm:p-6">
           <h1 className="text-2xl font-bold">주간 계획</h1>
           <p className="mt-2 text-slate-500">
             카테고리, 서브젝트, 워크/테스크를 생성하고 구조를 확인합니다.
@@ -246,6 +276,12 @@ export default function WeeklyPage() {
           {message && (
             <div className="mt-4 rounded-2xl bg-slate-100 p-3 text-sm text-slate-700">
               {message}
+            </div>
+          )}
+
+          {loading && (
+            <div className="mt-4 rounded-2xl bg-blue-50 p-3 text-sm text-blue-700">
+              데이터를 불러오는 중입니다.
             </div>
           )}
 
@@ -305,7 +341,11 @@ export default function WeeklyPage() {
                 value={subjectCategoryId}
                 onChange={(event) => setSubjectCategoryId(event.target.value)}
               >
-                <option value="">카테고리 선택</option>
+                <option value="">
+                  {categories.length === 0
+                    ? "카테고리를 먼저 생성하세요"
+                    : "카테고리 선택"}
+                </option>
                 {categories.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.name}
@@ -339,7 +379,11 @@ export default function WeeklyPage() {
                 value={workTaskSubjectId}
                 onChange={(event) => setWorkTaskSubjectId(event.target.value)}
               >
-                <option value="">서브젝트 선택</option>
+                <option value="">
+                  {subjects.length === 0
+                    ? "서브젝트를 먼저 생성하세요"
+                    : "서브젝트 선택"}
+                </option>
                 {subjects.map((subject) => (
                   <option key={subject.id} value={subject.id}>
                     {subject.categories?.name ?? "카테고리 없음"} &gt;{" "}
@@ -434,9 +478,17 @@ export default function WeeklyPage() {
           </div>
 
           <div className="mt-8 rounded-2xl border p-4">
-            <h2 className="font-semibold">현재 구조</h2>
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="font-semibold">현재 구조</h2>
+              <button
+                onClick={loadAll}
+                className="rounded-xl border px-3 py-2 text-sm hover:bg-slate-50"
+              >
+                새로고침
+              </button>
+            </div>
 
-            {subjectsByCategory.length === 0 && (
+            {categories.length === 0 && (
               <p className="mt-3 text-sm text-slate-500">
                 아직 생성된 카테고리가 없습니다.
               </p>
@@ -499,9 +551,7 @@ export default function WeeklyPage() {
                                 </div>
 
                                 <div className="mt-2 grid gap-1 text-slate-600">
-                                  <p>
-                                    분류: {item.classification ?? "-"}
-                                  </p>
+                                  <p>분류: {item.classification ?? "-"}</p>
                                   <p>
                                     별칭:{" "}
                                     {item.aliases && item.aliases.length > 0
