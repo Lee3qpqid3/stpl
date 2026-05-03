@@ -236,7 +236,7 @@ export default function WeeklyPage() {
     <main className="flex min-h-screen">
       <AppNav />
 
-      <section className="flex-1 p-6">
+      <section className="min-w-0 flex-1 overflow-x-hidden p-4 sm:p-6">
         <div className="rounded-3xl bg-white p-6 shadow">
           <h1 className="text-2xl font-bold">주간 계획</h1>
           <p className="mt-2 text-slate-500">
