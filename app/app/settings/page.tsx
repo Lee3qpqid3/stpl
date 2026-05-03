@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import AppNav from "@/components/AppNav";
+import { createClient } from "@/lib/supabase/client";
 
 type AccountSummary = {
   name: string;
@@ -21,6 +22,10 @@ export default function SettingsPage() {
   const [serialKey, setSerialKey] = useState("");
   const [message, setMessage] = useState("");
   const [summary, setSummary] = useState<AccountSummary | null>(null);
+
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [newPasswordConfirm, setNewPasswordConfirm] = useState("");
 
   async function loadSummary() {
     const response = await fetch("/api/account/summary");
@@ -67,6 +72,60 @@ export default function SettingsPage() {
     await loadSummary();
   }
 
+  async function changePassword() {
+    setMessage("비밀번호 변경 중...");
+
+    if (!currentPassword || !newPassword || !newPasswordConfirm) {
+      setMessage("기존 비밀번호, 새 비밀번호, 새 비밀번호 확인을 모두 입력하세요.");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setMessage("새 비밀번호는 6자 이상이어야 합니다.");
+      return;
+    }
+
+    if (newPassword !== newPasswordConfirm) {
+      setMessage("새 비밀번호와 새 비밀번호 확인이 일치하지 않습니다.");
+      return;
+    }
+
+    const supabase = createClient();
+
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+
+    if (!user?.email) {
+      setMessage("현재 로그인한 사용자 이메일을 확인할 수 없습니다.");
+      return;
+    }
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: currentPassword
+    });
+
+    if (signInError) {
+      setMessage("기존 비밀번호가 올바르지 않습니다.");
+      return;
+    }
+
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword
+    });
+
+    if (updateError) {
+      setMessage("비밀번호 변경 실패: " + updateError.message);
+      return;
+    }
+
+    setCurrentPassword("");
+    setNewPassword("");
+    setNewPasswordConfirm("");
+    setMessage("비밀번호를 변경했습니다.");
+  }
+
   return (
     <main className="min-h-screen md:flex">
       <AppNav />
@@ -91,8 +150,48 @@ export default function SettingsPage() {
                 <p>남은 기간: {summary.remainingText}</p>
               </div>
             ) : (
-              <p className="mt-3 text-sm text-slate-500">계정 정보를 불러오는 중입니다.</p>
+              <p className="mt-3 text-sm text-slate-500">
+                계정 정보를 불러오는 중입니다.
+              </p>
             )}
+          </div>
+
+          <div className="mt-6 rounded-2xl border p-4">
+            <h2 className="font-semibold">비밀번호 변경</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              기존 비밀번호를 확인한 뒤 새 비밀번호로 변경합니다.
+            </p>
+
+            <div className="mt-4 grid gap-3 md:max-w-xl">
+              <input
+                className="rounded-xl border p-3"
+                type="password"
+                placeholder="기존 비밀번호"
+                value={currentPassword}
+                onChange={(event) => setCurrentPassword(event.target.value)}
+              />
+              <input
+                className="rounded-xl border p-3"
+                type="password"
+                placeholder="새 비밀번호"
+                value={newPassword}
+                onChange={(event) => setNewPassword(event.target.value)}
+              />
+              <input
+                className="rounded-xl border p-3"
+                type="password"
+                placeholder="새 비밀번호 확인"
+                value={newPasswordConfirm}
+                onChange={(event) => setNewPasswordConfirm(event.target.value)}
+              />
+
+              <button
+                onClick={changePassword}
+                className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50"
+              >
+                비밀번호 변경
+              </button>
+            </div>
           </div>
 
           <div className="mt-6 rounded-2xl border p-4">
