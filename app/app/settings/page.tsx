@@ -127,7 +127,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <main className="min-h-screen md:flex">
+    <main className="flex min-h-screen">
       <AppNav />
       <section className="flex-1 p-6">
         <div className="rounded-3xl bg-white p-6 shadow">
