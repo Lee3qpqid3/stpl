@@ -4,9 +4,18 @@
   color-scheme: light;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 html,
 body {
+  width: 100%;
+  max-width: 100%;
   min-height: 100%;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -25,19 +34,6 @@ button,
 select,
 textarea {
   font: inherit;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
 }
 
 .writing-mode-vertical {
