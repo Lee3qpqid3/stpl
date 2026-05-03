@@ -253,8 +253,8 @@ export default function AdminSerialsPage() {
           </button>
         </div>
 
-        <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[1250px] border-collapse text-sm">
+        <div className="mt-4 w-full max-w-full overflow-x-auto rounded-xl">
+          <table className="min-w-[1250px] border-collapse text-sm">
             <thead>
               <tr className="border-b bg-slate-50 text-left">
                 <th className="p-3">시리얼키</th>
