@@ -39,7 +39,10 @@ export async function POST(request: Request) {
   const color = String(body.color ?? "#A7C7E7").trim();
 
   if (!name) {
-    return NextResponse.json({ error: "카테고리 이름이 필요합니다." }, { status: 400 });
+    return NextResponse.json(
+      { error: "카테고리 이름이 필요합니다." },
+      { status: 400 }
+    );
   }
 
   if (!/^#[0-9A-Fa-f]{6}$/.test(color)) {
@@ -50,6 +53,26 @@ export async function POST(request: Request) {
   }
 
   const supabaseAdmin = createAdminClient();
+
+  const { data: existingCategories, error: existingError } = await supabaseAdmin
+    .from("categories")
+    .select("id, name")
+    .eq("user_id", session.user.id);
+
+  if (existingError) {
+    return NextResponse.json({ error: existingError.message }, { status: 400 });
+  }
+
+  const duplicated = (existingCategories ?? []).some(
+    (category) => category.name.trim().toLowerCase() === name.toLowerCase()
+  );
+
+  if (duplicated) {
+    return NextResponse.json(
+      { error: "이미 같은 이름의 카테고리가 있습니다." },
+      { status: 409 }
+    );
+  }
 
   const { data, error } = await supabaseAdmin
     .from("categories")
