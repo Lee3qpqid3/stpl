@@ -18,8 +18,7 @@ export default function AppNav() {
 
   return (
     <>
-      {/* 좁은 화면: 항상 보이는 축소 사이드 탭 */}
-      <aside className="sticky top-0 z-40 flex h-dvh w-16 shrink-0 flex-col items-center border-r bg-white p-2 md:flex lg:hidden">
+      <aside className="sticky top-0 z-40 flex h-dvh w-16 shrink-0 flex-col items-center border-r bg-white p-2">
         <button
           onClick={() => setOpen(true)}
           className="mt-2 flex h-11 w-11 items-center justify-center rounded-xl border text-xl font-bold hover:bg-slate-50"
@@ -33,9 +32,8 @@ export default function AppNav() {
         </div>
       </aside>
 
-      {/* 좁은 화면: 메뉴 열렸을 때 오버레이 */}
       {open && (
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <div className="fixed inset-0 z-50">
           <button
             aria-label="메뉴 닫기"
             onClick={() => setOpen(false)}
@@ -76,27 +74,6 @@ export default function AppNav() {
           </aside>
         </div>
       )}
-
-      {/* 넓은 화면: 기존처럼 펼쳐진 사이드바 */}
-      <aside className="hidden h-dvh w-56 shrink-0 border-r bg-white p-3 lg:sticky lg:top-0 lg:block">
-        <nav className="flex h-full flex-col gap-2">
-          <div className="mb-3 px-3 py-2 text-lg font-bold">STPL</div>
-
-          {appLinks.map((link) => (
-            <Link
-              key={link.href}
-              className="whitespace-nowrap rounded-xl px-3 py-2 text-sm hover:bg-slate-100"
-              href={link.href}
-            >
-              {link.label}
-            </Link>
-          ))}
-
-          <div className="mt-auto">
-            <LogoutButton />
-          </div>
-        </nav>
-      </aside>
     </>
   );
 }
