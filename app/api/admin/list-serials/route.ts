@@ -13,16 +13,20 @@ export async function GET() {
 
   const { data: serials, error: serialError } = await supabaseAdmin
     .from("serial_keys")
-    .select("*")
+    .select(
+      "id, key_display, duration_days, status, created_at, used_at, used_by_user_id, memo"
+    )
     .order("created_at", { ascending: false });
 
   if (serialError) {
     return NextResponse.json({ error: serialError.message }, { status: 400 });
   }
 
+  const safeSerials = serials ?? [];
+
   const userIds = Array.from(
     new Set(
-      serials
+      safeSerials
         .map((serial) => serial.used_by_user_id)
         .filter((id): id is string => Boolean(id))
     )
@@ -39,7 +43,7 @@ export async function GET() {
     userNameMap = new Map((users ?? []).map((user) => [user.id, user.name]));
   }
 
-  const result = serials.map((serial) => ({
+  const result = safeSerials.map((serial) => ({
     id: serial.id,
     keyDisplay: serial.key_display,
     durationDays: serial.duration_days,
@@ -48,10 +52,13 @@ export async function GET() {
     usedAt: serial.used_at,
     usedByUserId: serial.used_by_user_id,
     usedByUserName: serial.used_by_user_id
-      ? userNameMap.get(serial.used_by_user_id) ?? "-"
+      ? userNameMap.get(serial.used_by_user_id) ?? "이름 없음"
       : "-",
     memo: serial.memo
   }));
 
-  return NextResponse.json({ serials: result });
+  return NextResponse.json({
+    count: result.length,
+    serials: result
+  });
 }
