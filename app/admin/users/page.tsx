@@ -11,6 +11,7 @@ type AdminUser = {
   proExpiresAt: string | null;
   isPro: boolean;
   createdAt: string;
+  isCurrentUser: boolean;
 };
 
 export default function AdminUsersPage() {
@@ -176,7 +177,7 @@ export default function AdminUsersPage() {
         </div>
 
         <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[900px] border-collapse text-sm">
+          <table className="w-full min-w-[950px] border-collapse text-sm">
             <thead>
               <tr className="border-b bg-slate-50 text-left">
                 <th className="p-3">이름</th>
@@ -191,7 +192,14 @@ export default function AdminUsersPage() {
             <tbody>
               {users.map((user) => (
                 <tr key={user.id} className="border-b">
-                  <td className="p-3">{user.name}</td>
+                  <td className="p-3">
+                    {user.name}
+                    {user.isCurrentUser && (
+                      <span className="ml-2 rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-600">
+                        현재 계정
+                      </span>
+                    )}
+                  </td>
                   <td className="p-3">{user.email}</td>
                   <td className="p-3">{user.role}</td>
                   <td className="p-3">{user.accountStatus}</td>
@@ -201,29 +209,37 @@ export default function AdminUsersPage() {
                       ? new Date(user.proExpiresAt).toLocaleString("ko-KR")
                       : "-"}
                   </td>
-                  <td className="flex gap-2 p-3">
-                    {user.accountStatus === "active" ? (
-                      <button
-                        onClick={() => updateUserStatus(user.id, "disabled")}
-                        className="rounded-lg border px-3 py-1 text-xs hover:bg-slate-50"
-                      >
-                        비활성화
-                      </button>
+                  <td className="p-3">
+                    {user.isCurrentUser ? (
+                      <span className="text-xs text-slate-400">
+                        자기 계정은 비활성화/삭제 불가
+                      </span>
                     ) : (
-                      <button
-                        onClick={() => updateUserStatus(user.id, "active")}
-                        className="rounded-lg border px-3 py-1 text-xs hover:bg-slate-50"
-                      >
-                        재활성화
-                      </button>
-                    )}
+                      <div className="flex gap-2">
+                        {user.accountStatus === "active" ? (
+                          <button
+                            onClick={() => updateUserStatus(user.id, "disabled")}
+                            className="rounded-lg border px-3 py-1 text-xs hover:bg-slate-50"
+                          >
+                            비활성화
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => updateUserStatus(user.id, "active")}
+                            className="rounded-lg border px-3 py-1 text-xs hover:bg-slate-50"
+                          >
+                            재활성화
+                          </button>
+                        )}
 
-                    <button
-                      onClick={() => deleteUser(user.id)}
-                      className="rounded-lg border border-red-200 px-3 py-1 text-xs text-red-600 hover:bg-red-50"
-                    >
-                      삭제
-                    </button>
+                        <button
+                          onClick={() => deleteUser(user.id)}
+                          className="rounded-lg border border-red-200 px-3 py-1 text-xs text-red-600 hover:bg-red-50"
+                        >
+                          삭제
+                        </button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}
