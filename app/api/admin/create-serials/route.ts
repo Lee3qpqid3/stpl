@@ -25,10 +25,24 @@ export async function POST(request: Request) {
 
   const supabaseAdmin = createAdminClient();
   const created: string[] = [];
+  let attempts = 0;
+  const maxAttempts = count * 20;
 
-  while (created.length < count) {
+  while (created.length < count && attempts < maxAttempts) {
+    attempts += 1;
+
     const raw = generateSerialRaw();
     const display = formatSerialKey(raw);
+
+    const { data: existing } = await supabaseAdmin
+      .from("serial_keys")
+      .select("id")
+      .eq("key_raw", raw)
+      .maybeSingle();
+
+    if (existing) {
+      continue;
+    }
 
     const { error } = await supabaseAdmin.from("serial_keys").insert({
       key_raw: raw,
@@ -42,6 +56,16 @@ export async function POST(request: Request) {
     if (!error) {
       created.push(display);
     }
+  }
+
+  if (created.length < count) {
+    return NextResponse.json(
+      {
+        error: "시리얼키 생성 중 중복이 반복되어 요청 개수를 모두 생성하지 못했습니다.",
+        serials: created
+      },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({
