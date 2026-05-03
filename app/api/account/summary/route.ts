@@ -34,8 +34,9 @@ export async function GET() {
 
   const { data: serials, error } = await supabaseAdmin
     .from("serial_keys")
-    .select("key_display, duration_days, used_at, status")
+    .select("key_display, duration_days, used_at, status, activation_start_at, activation_end_at")
     .eq("used_by_user_id", session.user.id)
+    .is("deleted_at", null)
     .order("used_at", { ascending: false });
 
   if (error) {
@@ -48,11 +49,13 @@ export async function GET() {
     isPro: session.isPro,
     proExpiresAt: session.profile.pro_expires_at,
     remainingText: getRemainingText(session.profile.pro_expires_at),
-    usedSerials: serials.map((serial) => ({
+    usedSerials: (serials ?? []).map((serial) => ({
       keyDisplay: serial.key_display,
       durationDays: serial.duration_days,
       usedAt: serial.used_at,
-      status: serial.status
+      status: serial.status,
+      activationStartAt: serial.activation_start_at,
+      activationEndAt: serial.activation_end_at
     }))
   });
 }
