@@ -199,6 +199,9 @@ export default function SettingsPage() {
             <p className="mt-1 text-sm text-slate-500">
               예: Kf8e-983L-3JUi-IOpd
             </p>
+            <div className="mt-3 rounded-2xl bg-amber-50 p-3 text-sm text-amber-900">
+              Pro 이용 중 시리얼키를 추가로 등록할 경우 환불은 불가능하며, 기존 Pro 기간이 끝난 이후 자동으로 이어서 사용됩니다.
+            </div>
             <input
               className="mt-4 w-full rounded-xl border p-3"
               value={serialKey}
